@@ -19,15 +19,16 @@ const App: React.FC = () => {
     setUser({ isLoggedIn: true, role: role, username: username });
     setPage('feed');
   };
-
-  const handleLogin = async (e: React.FormEvent) => {
+const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginCredentials)
       });
+
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.access_token);
@@ -36,7 +37,7 @@ const App: React.FC = () => {
         alert("Identifiants incorrects");
       }
     } catch (error) {
-      alert("Erreur de connexion au serveur.");
+      alert("Le serveur backend ne répond pas.");
     }
   };
 

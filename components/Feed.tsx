@@ -12,19 +12,19 @@ const Feed: React.FC = () => {
   // <-- ÉTAT POUR GÉRER LA MODALE
   const [selectedPro, setSelectedPro] = useState<{id: string, name: string} | null>(null);
 
-  useEffect(() => {
+ useEffect(() => {
     const fetchTalents = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/v1/feed/');
+        // On utilise la variable d'environnement ici
+        const API_URL = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${API_URL}/feed/`);
 
-        if (!response.ok) {
-          throw new Error('Erreur lors de la récupération des données');
-        }
-
+        if (!response.ok) throw new Error('Erreur serveur');
         const data = await response.json();
 
-        const formattedPosts: Post[] = data.map((user: any) => ({
+        // ... reste de ton mapping (formattedPosts) ...
+        const formattedPosts = data.map((user: any) => ({
           id: user.id.toString(),
           type: user.role,
           name: user.role === UserRole.FOURNISSEUR ? user.shop_name : user.username,
@@ -35,7 +35,6 @@ const Feed: React.FC = () => {
           rating: user.rating,
           avatar: user.avatar_url
         }));
-
         setPosts(formattedPosts);
       } catch (err: any) {
         setError(err.message);
@@ -43,7 +42,6 @@ const Feed: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchTalents();
   }, []);
 
