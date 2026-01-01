@@ -25,46 +25,44 @@ const Register: React.FC<RegisterProps> = ({ onSuccess, onNavigate, initialRole 
     setRole(selectedRole);
     setStep(2);
   };
+// Dans Register.tsx
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    // Préparation du corps de la requête pour correspondre au schéma Python (snake_case)
-    const payload = {
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-      role: role,
-      city: formData.city,
-      // On n'envoie les champs que s'ils sont remplis
-      specialty: role === UserRole.PRESTATAIRE ? formData.specialty : null,
-      shop_name: role === UserRole.FOURNISSEUR ? formData.shopName : null,
-    };
-
-    try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Stockage du token
-        localStorage.setItem('token', data.access_token);
-        // Notification du succès au composant parent (App.tsx)
-        onSuccess(data.username, data.role as UserRole);
-      } else {
-        const errorData = await response.json();
-        alert(errorData.detail || "Erreur lors de l'inscription");
-      }
-    } catch (error) {
-      alert("Impossible de contacter le serveur.");
-    } finally {
-      setLoading(false);
-    }
+  const payload = {
+    username: formData.username,
+    email: formData.email,
+    password: formData.password,
+    role: role,
+    city: formData.city,
+    specialty: role === UserRole.PRESTATAIRE ? formData.specialty : null,
+    shop_name: role === UserRole.FOURNISSEUR ? formData.shopName : null,
   };
+
+  try {
+    // MODIFICATION ICI : On utilise VITE_API_URL
+    const API_URL = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('token', data.access_token);
+      onSuccess(data.username, data.role as UserRole);
+    } else {
+      const errorData = await response.json();
+      alert(errorData.detail || "Erreur lors de l'inscription");
+    }
+  } catch (error) {
+    alert("Impossible de contacter le serveur.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (step === 1) {
     return (

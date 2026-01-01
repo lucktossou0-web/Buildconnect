@@ -9,42 +9,46 @@ const Messages: React.FC = () => {
 
   const token = localStorage.getItem('token');
 
-  // Charger la liste des contacts
-  useEffect(() => {
-    fetch('http://localhost:8000/api/v1/messages/inbox', {
+// Dans Messages.tsx
+const API_URL = import.meta.env.VITE_API_URL; // On définit l'URL en haut
+
+// 1. Charger l'inbox
+useEffect(() => {
+  fetch(`${API_URL}/messages/inbox`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  .then(res => res.json())
+  .then(data => setContacts(data));
+}, []);
+
+// 2. Charger la conversation
+useEffect(() => {
+  if (activeContact) {
+    fetch(`${API_URL}/messages/conversation/${activeContact.id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     .then(res => res.json())
-    .then(data => setContacts(data));
-  }, []);
+    .then(data => setMessages(data));
+  }
+}, [activeContact]);
 
-  // Charger la conversation quand on clique sur un contact
-  useEffect(() => {
-    if (activeContact) {
-      fetch(`http://localhost:8000/api/v1/messages/conversation/${activeContact.id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      .then(res => res.json())
-      .then(data => setMessages(data));
-    }
-  }, [activeContact]);
-
-  const sendMessage = async () => {
-    if (!newMessage.trim()) return;
-    const response = await fetch('http://localhost:8000/api/v1/messages/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ receiver_id: activeContact.id, content: newMessage })
-    });
-    if (response.ok) {
-      const msg = await response.json();
-      setMessages([...messages, msg]);
-      setNewMessage("");
-    }
-  };
+// 3. Envoyer un message
+const sendMessage = async () => {
+  if (!newMessage.trim()) return;
+  const response = await fetch(`${API_URL}/messages/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ receiver_id: activeContact.id, content: newMessage })
+  });
+  if (response.ok) {
+    const msg = await response.json();
+    setMessages([...messages, msg]);
+    setNewMessage("");
+  }
+};
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 h-[80vh] flex gap-6">
