@@ -1,0 +1,394 @@
+
+import React, { useState } from 'react';
+import { MOCK_POSTS } from '../data';
+import { Post, UserRole } from '../types';
+
+const Feed: React.FC = () => {
+  const [filter, setFilter] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'all' | UserRole.PRESTATAIRE | UserRole.FOURNISSEUR>('all');
+
+  const filteredPosts = MOCK_POSTS.filter(post => {
+    const matchesTab = activeTab === 'all' || post.type === activeTab;
+    const matchesSearch = post.name.toLowerCase().includes(filter.toLowerCase()) || 
+                         post.category.toLowerCase().includes(filter.toLowerCase()) ||
+                         post.location.toLowerCase().includes(filter.toLowerCase());
+    return matchesTab && matchesSearch;
+  });
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header & Filter */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+        <div>
+          <h1 className="text-4xl font-bold text-marron-900 tracking-tight">Projets & Professionnels</h1>
+          <p className="text-marron-600 mt-2">Découvrez les meilleurs talents du BTP au Bénin.</p>
+        </div>
+        
+        <div className="w-full md:w-96">
+          <div className="relative">
+            <input 
+              type="text" 
+              placeholder="Rechercher un métier, une ville..."
+              className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white border border-marron-100 shadow-sm focus:ring-2 focus:ring-marron-500 focus:outline-none transition-all"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-marron-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex space-x-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+        <button 
+          onClick={() => setActiveTab('all')}
+          className={`px-8 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${activeTab === 'all' ? 'bg-marron-800 text-white shadow-lg transform scale-105' : 'bg-white text-marron-600 border border-marron-100 hover:bg-marron-50'}`}
+        >
+          Tout voir
+        </button>
+        <button 
+          onClick={() => setActiveTab(UserRole.PRESTATAIRE)}
+          className={`px-8 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${activeTab === UserRole.PRESTATAIRE ? 'bg-rouge text-white shadow-lg transform scale-105' : 'bg-white text-marron-600 border border-marron-100 hover:bg-marron-50'}`}
+        >
+          Prestataires
+        </button>
+        <button 
+          onClick={() => setActiveTab(UserRole.FOURNISSEUR)}
+          className={`px-8 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${activeTab === UserRole.FOURNISSEUR ? 'bg-marron-600 text-white shadow-lg transform scale-105' : 'bg-white text-marron-600 border border-marron-100 hover:bg-marron-50'}`}
+        >
+          Fournisseurs
+        </button>
+      </div>
+
+      {/* Grid Feed */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-fade-in">
+        {filteredPosts.map((post, idx) => (
+          <div 
+            key={post.id} 
+            className="group relative bg-white rounded-3xl overflow-hidden border border-marron-50 shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 cursor-pointer"
+            style={{ animationDelay: `${idx * 100}ms` }}
+          >
+            <div className="aspect-[4/5] overflow-hidden">
+              <img 
+                src={post.imageUrl} 
+                alt={post.name} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-marron-900/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+            
+            <div className="p-5">
+              <div className="flex items-center space-x-3 mb-3">
+                <img src={post.avatar} alt="" className="w-10 h-10 rounded-full border-2 border-white shadow-md" />
+                <div>
+                  <h3 className="font-bold text-marron-900 group-hover:text-rouge transition-colors truncate w-32">{post.name}</h3>
+                  <p className="text-xs text-marron-500">{post.location}</p>
+                </div>
+                <div className="ml-auto flex items-center bg-champagne/30 px-2 py-1 rounded-lg">
+                  <span className="text-yellow-600 text-xs font-bold">★ {post.rating}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between mt-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-marron-400">{post.category}</span>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase ${post.type === UserRole.PRESTATAIRE ? 'bg-rouge/10 text-rouge' : 'bg-marron-100 text-marron-800'}`}>
+                  {post.type}
+                </span>
+              </div>
+            </div>
+
+            {/* Hover Actions */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+               <button className="bg-white text-marron-900 px-6 py-2 rounded-full font-bold shadow-xl hover:bg-champagne transition-colors">
+                 Détails
+               </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      {filteredPosts.length === 0 && (
+        <div className="text-center py-24">
+          <div className="text-marron-200 text-8xl mb-4">📭</div>
+          <p className="text-marron-500 text-xl font-medium">Aucun résultat trouvé pour votre recherche.</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Feed;
+
+import React from 'react';
+import { UserState } from '../types';
+
+interface LayoutProps {
+  children: React.ReactNode;
+  user: UserState;
+  onLogout: () => void;
+  onNavigate: (page: string) => void;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, onNavigate }) => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <nav className="sticky top-0 z-50 glass-effect border-b border-marron-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-20 items-center">
+            <div 
+              className="flex items-center cursor-pointer group"
+              onClick={() => onNavigate('feed')}
+            >
+              <span className="text-2xl font-black tracking-tighter text-marron-800 transition-all group-hover:text-rouge">
+                BUILD<span className="text-rouge">CONNECT</span>
+              </span>
+            </div>
+            
+            <div className="hidden md:flex items-center space-x-8">
+              <button 
+                onClick={() => onNavigate('feed')}
+                className="text-marron-800 font-medium hover:text-rouge transition-colors"
+              >
+                Explorer
+              </button>
+              {user.isLoggedIn ? (
+                <>
+                  <span className="text-marron-600">Bienvenue, <strong className="text-marron-800">{user.username}</strong></span>
+                  <button 
+                    onClick={onLogout}
+                    className="bg-marron-800 text-white px-6 py-2 rounded-full font-medium hover:bg-marron-900 transition-all transform hover:scale-105 active:scale-95 shadow-md"
+                  >
+                    Déconnexion
+                  </button>
+                </>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <button 
+                    onClick={() => onNavigate('login')}
+                    className="text-marron-800 font-medium hover:text-rouge transition-colors"
+                  >
+                    Connexion
+                  </button>
+                  <button 
+                    onClick={() => onNavigate('register-role')}
+                    className="bg-rouge text-white px-6 py-2 rounded-full font-medium hover:bg-rouge-dark transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+                  >
+                    Rejoindre
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main className="flex-grow">
+        {children}
+      </main>
+
+      <footer className="bg-marron-900 text-white py-12 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div className="col-span-1 md:col-span-2">
+              <span className="text-xl font-bold tracking-tighter">BUILD<span className="text-rouge-50">CONNECT</span></span>
+              <p className="mt-4 text-marron-200 max-w-sm">
+                La première plateforme de mise en relation pour les professionnels du bâtiment au Bénin. Construisons ensemble l'avenir de nos villes.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-champagne">Plateforme</h3>
+              <ul className="space-y-2 text-marron-300">
+                <li><a href="#" className="hover:text-white transition-colors">À propos</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Partenaires</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Aide & Support</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-champagne">Contact</h3>
+              <ul className="space-y-2 text-marron-300">
+                <li>Cotonou, Bénin</li>
+                <li>contact@buildconnect.bj</li>
+                <li>+229 00 00 00 00</li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-marron-800 mt-12 pt-8 text-center text-marron-400 text-sm">
+            © {new Date().getFullYear()} BuildConnect. Tous droits réservés.
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default Layout;
+
+import React, { useState } from 'react';
+import { UserRole } from '../types';
+
+interface RegisterProps {
+  onSuccess: (username: string, role: UserRole) => void;
+  onNavigate: (page: string) => void;
+  initialRole?: UserRole | null;
+}
+
+const Register: React.FC<RegisterProps> = ({ onSuccess, onNavigate, initialRole }) => {
+  const [step, setStep] = useState(initialRole ? 2 : 1);
+  const [role, setRole] = useState<UserRole | null>(initialRole || null);
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    email: '',
+    specialty: '',
+    shopName: '',
+    city: '',
+  });
+
+  const handleRoleSelect = (selectedRole: UserRole) => {
+    setRole(selectedRole);
+    setStep(2);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (role) {
+      onSuccess(formData.username || 'Utilisateur', role);
+    }
+  };
+
+  if (step === 1) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-16">
+        <h2 className="text-3xl font-bold text-center text-marron-900 mb-4">Choisissez votre profil</h2>
+        <p className="text-marron-600 text-center mb-12">L'aventure BuildConnect commence ici. Quel est votre rôle ?</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            { 
+              id: UserRole.CLIENT, 
+              title: 'Client', 
+              desc: 'Je cherche des pros pour mon projet.',
+              icon: '🏗️',
+              color: 'hover:border-marron-500 hover:bg-marron-50'
+            },
+            { 
+              id: UserRole.PRESTATAIRE, 
+              title: 'Prestataire', 
+              desc: 'Je propose mes services BTP.',
+              icon: '🛠️',
+              color: 'hover:border-rouge hover:bg-rouge/5'
+            },
+            { 
+              id: UserRole.FOURNISSEUR, 
+              title: 'Fournisseur', 
+              desc: 'Je vends des matériaux de qualité.',
+              icon: '🚛',
+              color: 'hover:border-marron-800 hover:bg-marron-100'
+            }
+          ].map((item) => (
+            <div 
+              key={item.id}
+              onClick={() => handleRoleSelect(item.id)}
+              className={`p-10 bg-white rounded-3xl border-2 border-transparent shadow-xl cursor-pointer transition-all transform hover:-translate-y-2 text-center group ${item.color}`}
+            >
+              <div className="text-6xl mb-6 grayscale group-hover:grayscale-0 transition-all">{item.icon}</div>
+              <h3 className="text-2xl font-bold text-marron-900 mb-2">{item.title}</h3>
+              <p className="text-marron-500">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-xl mx-auto px-4 py-16">
+      <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-marron-50 animate-fade-in">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-black text-marron-900 tracking-tight">Inscription <span className="text-rouge">{role}</span></h2>
+          <button onClick={() => setStep(1)} className="text-sm text-marron-400 hover:text-marron-900 transition-colors">← Changer de rôle</button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-bold text-marron-700 mb-2">Pseudo</label>
+            <input 
+              type="text" 
+              required
+              className="w-full px-5 py-4 bg-marron-50/50 border border-marron-100 rounded-2xl focus:ring-2 focus:ring-marron-500 focus:outline-none transition-all"
+              placeholder="Ex: Moussa_Dev"
+              value={formData.username}
+              onChange={(e) => setFormData({...formData, username: e.target.value})}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-marron-700 mb-2">Email</label>
+            <input 
+              type="email" 
+              required
+              className="w-full px-5 py-4 bg-marron-50/50 border border-marron-100 rounded-2xl focus:ring-2 focus:ring-marron-500 focus:outline-none transition-all"
+              placeholder="moussa@example.bj"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-marron-700 mb-2">Mot de passe</label>
+            <input 
+              type="password" 
+              required
+              className="w-full px-5 py-4 bg-marron-50/50 border border-marron-100 rounded-2xl focus:ring-2 focus:ring-marron-500 focus:outline-none transition-all"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+            />
+          </div>
+
+          {/* Champs spécifiques */}
+          {role === UserRole.PRESTATAIRE && (
+            <div className="animate-slide-up">
+              <label className="block text-sm font-bold text-rouge mb-2">Votre Spécialité</label>
+              <input 
+                type="text" 
+                required
+                className="w-full px-5 py-4 bg-rouge/5 border border-rouge/20 rounded-2xl focus:ring-2 focus:ring-rouge focus:outline-none transition-all"
+                placeholder="Ex: Électricien, Maçon..."
+                value={formData.specialty}
+                onChange={(e) => setFormData({...formData, specialty: e.target.value})}
+              />
+            </div>
+          )}
+
+          {role === UserRole.FOURNISSEUR && (
+            <div className="animate-slide-up">
+              <label className="block text-sm font-bold text-marron-800 mb-2">Nom de la Boutique</label>
+              <input 
+                type="text" 
+                required
+                className="w-full px-5 py-4 bg-marron-100 border border-marron-200 rounded-2xl focus:ring-2 focus:ring-marron-800 focus:outline-none transition-all"
+                placeholder="Ex: Quincaillerie Bénin Top"
+                value={formData.shopName}
+                onChange={(e) => setFormData({...formData, shopName: e.target.value})}
+              />
+            </div>
+          )}
+
+          <div className="pt-4">
+            <button 
+              type="submit"
+              className="w-full py-5 bg-marron-900 text-white rounded-2xl font-bold text-lg hover:bg-black transition-all transform active:scale-95 shadow-lg"
+            >
+              Créer mon compte
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Register;

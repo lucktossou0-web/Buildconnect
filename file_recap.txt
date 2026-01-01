@@ -1,0 +1,401 @@
+
+import React, { useState, useEffect } from 'react';
+import Layout from './components/Layout';
+import Feed from './components/Feed';
+import Register from './components/Register';
+import { UserRole, UserState } from './types';
+
+const App: React.FC = () => {
+  const [page, setPage] = useState<string>('feed');
+  const [user, setUser] = useState<UserState>({
+    isLoggedIn: false,
+    role: null,
+    username: null
+  });
+  const [selectedRoleForRegister, setSelectedRoleForRegister] = useState<UserRole | null>(null);
+
+  // Animation simple pour le changement de page
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page]);
+
+  const handleLoginSuccess = (username: string, role: UserRole) => {
+    setUser({
+      isLoggedIn: true,
+      role: role,
+      username: username
+    });
+    setPage('feed');
+  };
+
+  const handleLogout = () => {
+    setUser({
+      isLoggedIn: false,
+      role: null,
+      username: null
+    });
+    setPage('feed');
+  };
+
+  const renderContent = () => {
+    switch (page) {
+      case 'feed':
+        return <Feed />;
+      case 'register-role':
+        return (
+          <Register 
+            onSuccess={handleLoginSuccess} 
+            onNavigate={setPage} 
+            initialRole={null} 
+          />
+        );
+      case 'login':
+        return (
+          <div className="max-w-md mx-auto py-24 px-4">
+            <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-marron-50">
+              <h2 className="text-3xl font-black text-marron-900 mb-8 tracking-tight">Connexion</h2>
+              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleLoginSuccess('Moussa', UserRole.CLIENT); }}>
+                <div>
+                  <label className="block text-sm font-bold text-marron-700 mb-2">Utilisateur</label>
+                  <input type="text" placeholder="Pseudo" className="w-full px-5 py-4 bg-marron-50 rounded-2xl border-none focus:ring-2 focus:ring-marron-500 transition-all outline-none" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-marron-700 mb-2">Mot de passe</label>
+                  <input type="password" placeholder="••••••••" className="w-full px-5 py-4 bg-marron-50 rounded-2xl border-none focus:ring-2 focus:ring-marron-500 transition-all outline-none" required />
+                </div>
+                <button className="w-full py-5 bg-rouge text-white rounded-2xl font-bold shadow-xl hover:bg-rouge-dark transition-all transform active:scale-95">
+                  Se connecter
+                </button>
+              </form>
+              <p className="mt-8 text-center text-marron-400">
+                Pas de compte ? <button onClick={() => setPage('register-role')} className="text-marron-900 font-bold hover:underline">S'inscrire</button>
+              </p>
+            </div>
+          </div>
+        );
+      default:
+        return <Feed />;
+    }
+  };
+
+  return (
+    <Layout user={user} onLogout={handleLogout} onNavigate={setPage}>
+      <div className="animate-in fade-in duration-700">
+        {renderContent()}
+      </div>
+    </Layout>
+  );
+};
+
+export default App;
+
+import { UserRole, Post } from './types';
+
+export const MOCK_POSTS: Post[] = [
+  {
+    id: '1',
+    type: UserRole.PRESTATAIRE,
+    name: "Architecte Ibrahim",
+    category: "Architecture & Design",
+    location: "Cotonou, Fidjrossè",
+    imageUrl: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=1000&auto=format&fit=crop",
+    description: "Conception moderne alliant tradition et innovation.",
+    rating: 4.9,
+    avatar: "https://i.pravatar.cc/150?u=ibrahim"
+  },
+  {
+    id: '2',
+    type: UserRole.FOURNISSEUR,
+    name: "Quincaillerie Le Sommet",
+    category: "Matériaux de Construction",
+    location: "Porto-Novo",
+    imageUrl: "https://images.unsplash.com/photo-1581094288338-2314dddb7ecc?q=80&w=1000&auto=format&fit=crop",
+    description: "Ciment, fer à béton et outillage professionnel.",
+    rating: 4.7,
+    avatar: "https://i.pravatar.cc/150?u=sommet"
+  },
+  {
+    id: '3',
+    type: UserRole.PRESTATAIRE,
+    name: "Moussa Maçonnerie",
+    category: "Gros Oeuvre",
+    location: "Abomey-Calavi",
+    imageUrl: "https://images.unsplash.com/photo-1541888946425-d81bb19480c5?q=80&w=1000&auto=format&fit=crop",
+    description: "Expert en fondations et élévation de murs.",
+    rating: 4.5,
+    avatar: "https://i.pravatar.cc/150?u=moussa"
+  },
+  {
+    id: '4',
+    type: UserRole.FOURNISSEUR,
+    name: "Bénin Carrelage",
+    category: "Revêtements",
+    location: "Cotonou, Akpakpa",
+    imageUrl: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=1000&auto=format&fit=crop",
+    description: "Large choix de carreaux importés et locaux.",
+    rating: 4.8,
+    avatar: "https://i.pravatar.cc/150?u=carrelage"
+  },
+  {
+    id: '5',
+    type: UserRole.PRESTATAIRE,
+    name: "Ets Lumière",
+    category: "Électricité Bâtiment",
+    location: "Parakou",
+    imageUrl: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=1000&auto=format&fit=crop",
+    description: "Installation électrique aux normes internationales.",
+    rating: 4.6,
+    avatar: "https://i.pravatar.cc/150?u=lumiere"
+  },
+  {
+    id: '6',
+    type: UserRole.FOURNISSEUR,
+    name: "Bois du Nord",
+    category: "Menuiserie & Bois",
+    location: "Djougou",
+    imageUrl: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=1000&auto=format&fit=crop",
+    description: "Bois de charpente de haute qualité.",
+    rating: 4.4,
+    avatar: "https://i.pravatar.cc/150?u=bois"
+  },
+  {
+    id: '7',
+    type: UserRole.PRESTATAIRE,
+    name: "Peinture Elite",
+    category: "Finition & Déco",
+    location: "Cotonou, Haie Vive",
+    imageUrl: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=1000&auto=format&fit=crop",
+    description: "Finitions soignées pour vos villas et bureaux.",
+    rating: 5.0,
+    avatar: "https://i.pravatar.cc/150?u=peinture"
+  },
+  {
+    id: '8',
+    type: UserRole.PRESTATAIRE,
+    name: "Sébastien Plomberie",
+    category: "Sanitaire",
+    location: "Ouidah",
+    imageUrl: "https://images.unsplash.com/photo-1585704032915-c3400ca1f963?q=80&w=1000&auto=format&fit=crop",
+    description: "Dépannage et installation de systèmes complexes.",
+    rating: 4.7,
+    avatar: "https://i.pravatar.cc/150?u=plomberie"
+  }
+];
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildConnect | Excellence BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              marron: {
+                50: '#fdf8f6',
+                100: '#f2e8e5',
+                200: '#eaddd7',
+                300: '#e0cec7',
+                400: '#d2bab0',
+                500: '#bfa094',
+                600: '#a18072',
+                700: '#846358',
+                800: '#432818',
+                900: '#2b1a10',
+              },
+              rouge: {
+                50: '#fef2f2',
+                DEFAULT: '#991b1b',
+                dark: '#7f1d1d',
+              },
+              champagne: {
+                DEFAULT: '#f7e7ce',
+                light: '#fff9f0',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #fdf8f6;
+        scroll-behavior: smooth;
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #846358;
+        border-radius: 10px;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.6s ease-out forwards;
+      }
+      
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-slide-up {
+        animation: slideUp 0.5s ease-out forwards;
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error("Impossible de trouver l'élément racine.");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+{
+  "name": "BuildConnect",
+  "description": "La plateforme de référence pour connecter clients, prestataires BTP et fournisseurs de matériaux au Bénin. Design élégant et interface intuitive pour vos projets de construction.",
+  "requestFramePermissions": []
+}
+{
+  "name": "buildconnect",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0"
+  }
+}
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
+
+# Run and deploy your AI Studio app
+
+This contains everything you need to run your app locally.
+
+View your app in AI Studio: https://ai.studio/apps/drive/1KaLgGqfXoDaeK8MvzLiC11fNOZhEjIzF
+
+## Run Locally
+
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
+
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["."],
+  "exclude": ["node_modules"]
+}
+
+export enum UserRole {
+  CLIENT = 'client',
+  PRESTATAIRE = 'prestataire',
+  FOURNISSEUR = 'fournisseur'
+}
+
+export interface Post {
+  id: string;
+  type: UserRole;
+  name: string;
+  category: string;
+  location: string;
+  imageUrl: string;
+  description: string;
+  rating: number;
+  avatar: string;
+}
+
+export interface UserState {
+  isLoggedIn: boolean;
+  role: UserRole | null;
+  username: string | null;
+}
+
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 3000,
+  },
+});
