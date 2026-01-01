@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildConnect | Excellence BTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              marron: {
+                50: '#fdf8f6',
+                100: '#f2e8e5',
+                200: '#eaddd7',
+                300: '#e0cec7',
+                400: '#d2bab0',
+                500: '#bfa094',
+                600: '#a18072',
+                700: '#846358',
+                800: '#432818',
+                900: '#2b1a10',
+              },
+              rouge: {
+                50: '#fef2f2',
+                DEFAULT: '#991b1b',
+                dark: '#7f1d1d',
+              },
+              champagne: {
+                DEFAULT: '#f7e7ce',
+                light: '#fff9f0',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #fdf8f6;
+        scroll-behavior: smooth;
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #846358;
+        border-radius: 10px;
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
