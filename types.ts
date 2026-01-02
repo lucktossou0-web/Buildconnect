@@ -22,3 +22,17 @@ export interface UserState {
   role: UserRole | null;
   username: string | null;
 }
+
+export enum UserRole {
+  CLIENT = 'client',
+  PRESTATAIRE = 'prestataire',
+  FOURNISSEUR = 'fournisseur'
+}
+
+export interface UserState {
+  isLoggedIn: boolean;
+  role: UserRole | null;
+  username: string | null;
+  userId?: number | null;
+  isAdmin?: boolean;
+}
