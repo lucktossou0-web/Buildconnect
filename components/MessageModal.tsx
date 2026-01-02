@@ -10,16 +10,29 @@ const MessageModal: React.FC<MessageModalProps> = ({ proName, proId, onClose }) 
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
+  // 1. RÉCUPÉRATION DE L'URL DYNAMIQUE
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
   const handleSend = async () => {
     if (!message.trim()) return;
     setSending(true);
 
+    const token = localStorage.getItem('token');
+
+    // Vérification de sécurité avant l'envoi
+    if (!token) {
+      alert("Vous devez être connecté pour envoyer un message.");
+      setSending(false);
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:8000/api/v1/messages/', {
+      // 2. UTILISATION DE L'URL DYNAMIQUE ICI
+      const response = await fetch(`${API_URL}/messages/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}` // Token d'authentification
         },
         body: JSON.stringify({
           receiver_id: parseInt(proId),
@@ -31,10 +44,17 @@ const MessageModal: React.FC<MessageModalProps> = ({ proName, proId, onClose }) 
         alert("Message envoyé avec succès !");
         onClose();
       } else {
-        alert("Erreur lors de l'envoi.");
+        // 3. DEBUGGING : Afficher le code d'erreur exact
+        const errorData = await response.json().catch(() => ({}));
+        alert(`Erreur ${response.status} : ${errorData.detail || "Échec de l'envoi"}`);
+
+        if (response.status === 401) {
+          alert("Votre session a expiré. Veuillez vous reconnecter.");
+        }
       }
     } catch (error) {
-      alert("Erreur réseau.");
+      console.error(error);
+      alert("Erreur réseau : Impossible de contacter le serveur Render.");
     } finally {
       setSending(false);
     }
@@ -42,7 +62,7 @@ const MessageModal: React.FC<MessageModalProps> = ({ proName, proId, onClose }) 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-marron-900/60 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl animate-fade-in">
+      <div className="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl animate-fade-in border border-marron-50">
         <h3 className="text-2xl font-black text-marron-900 mb-2">Contacter {proName}</h3>
         <p className="text-marron-500 mb-6 text-sm">Posez vos questions ou demandez un devis directement.</p>
 
