@@ -1,5 +1,3 @@
-import React, { useState, useEffect } from 'react';
-
 const Admin: React.FC<{onNavigateToChat: () => void}> = ({ onNavigateToChat }) => {
   const [users, setUsers] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
@@ -12,18 +10,20 @@ const Admin: React.FC<{onNavigateToChat: () => void}> = ({ onNavigateToChat }) =
   const fetchData = async () => {
     try {
       const h = { 'Authorization': `Bearer ${token}` };
+
+      // Test de la liste des utilisateurs
       const resU = await fetch(`${API_URL}/users/admin/all`, { headers: h });
-      const resP = await fetch(`${API_URL}/users/admin/payments`, { headers: h });
-
-      if (!resU.ok || !resP.ok) {
-        throw new Error(`Erreur serveur (Status: ${resU.status})`);
-      }
-
+      if (resU.status === 403) throw new Error("Accès refusé : Vous n'êtes pas Admin pour le serveur.");
+      if (!resU.ok) throw new Error(`Erreur liste utilisateurs (Code: ${resU.status})`);
       const dataU = await resU.json();
+
+      // Test de la liste des paiements
+      const resP = await fetch(`${API_URL}/users/admin/payments`, { headers: h });
+      if (!resP.ok) throw new Error(`Erreur liste paiements (La table payments existe-t-elle ? Code: ${resP.status})`);
       const dataP = await resP.json();
 
-      setUsers(Array.isArray(dataU) ? dataU : []);
-      setPayments(Array.isArray(dataP) ? dataP : []);
+      setUsers(dataU);
+      setPayments(dataP);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -33,8 +33,16 @@ const Admin: React.FC<{onNavigateToChat: () => void}> = ({ onNavigateToChat }) =
 
   useEffect(() => { fetchData(); }, []);
 
-  if (error) return <div className="p-20 text-center text-rouge font-bold">Erreur Admin : {error}. <br/>Vérifiez que vous êtes bien Admin en base de données.</div>;
-  if (loading) return <div className="p-20 text-center animate-pulse">Chargement de la console...</div>;
+  if (error) return (
+    <div className="max-w-xl mx-auto mt-20 p-10 bg-white rounded-[2.5rem] shadow-2xl text-center">
+      <div className="text-rouge text-5xl mb-6">⚠️</div>
+      <h2 className="text-2xl font-black text-marron-900 mb-4">Problème de configuration</h2>
+      <p className="text-marron-500 font-medium mb-8">{error}</p>
+      <button onClick={() => window.location.reload()} className="bg-marron-900 text-white px-8 py-3 rounded-full font-bold">Réessayer</button>
+    </div>
+  );
+
+  if (loading) return <div className="py-40 text-center animate-pulse font-black text-marron-200 uppercase tracking-widest">Initialisation de la console...</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-20 animate-fade-in">
