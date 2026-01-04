@@ -3,34 +3,38 @@ import React, { useState, useEffect } from 'react';
 const Admin: React.FC<{onNavigateToChat: () => void}> = ({ onNavigateToChat }) => {
   const [users, setUsers] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const API_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem('token');
 
   const fetchData = async () => {
-    const h = { 'Authorization': `Bearer ${token}` };
-    const [u, p] = await Promise.all([
-      fetch(`${API_URL}/users/admin/all`, { headers: h }).then(r => r.json()),
-      fetch(`${API_URL}/users/admin/payments`, { headers: h }).then(r => r.json())
-    ]);
-    setUsers(u); setPayments(p);
+    try {
+      const h = { 'Authorization': `Bearer ${token}` };
+      const resU = await fetch(`${API_URL}/users/admin/all`, { headers: h });
+      const resP = await fetch(`${API_URL}/users/admin/payments`, { headers: h });
+
+      if (!resU.ok || !resP.ok) {
+        throw new Error(`Erreur serveur (Status: ${resU.status})`);
+      }
+
+      const dataU = await resU.json();
+      const dataP = await resP.json();
+
+      setUsers(Array.isArray(dataU) ? dataU : []);
+      setPayments(Array.isArray(dataP) ? dataP : []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchData(); }, []);
 
-  const approve = async (id: number) => {
-    await fetch(`${API_URL}/users/admin/payments/${id}/approve`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-    fetchData();
-  };
-
-  const toggleStatus = async (id: number) => {
-    await fetch(`${API_URL}/users/admin/toggle-status/${id}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
-    fetchData();
-  };
-
-  const handleChat = (u: any) => {
-    localStorage.setItem('admin_chat_target', JSON.stringify(u));
-    onNavigateToChat();
-  };
+  if (error) return <div className="p-20 text-center text-rouge font-bold">Erreur Admin : {error}. <br/>Vérifiez que vous êtes bien Admin en base de données.</div>;
+  if (loading) return <div className="p-20 text-center animate-pulse">Chargement de la console...</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 space-y-20 animate-fade-in">
