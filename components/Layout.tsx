@@ -25,7 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, onNavigate })
           {/* LOGO */}
           <div
             className="flex items-center cursor-pointer group"
-            onClick={() => handleNav('feed')}
+            onClick={() => handleNav(user.isLoggedIn ? 'feed' : 'home')}
           >
             <span className="text-xl md:text-2xl font-black tracking-tighter text-marron-800 transition-all group-hover:text-rouge">
               BUILD<span className="text-rouge">CONNECT</span>
